@@ -6,7 +6,7 @@ import morgan from "morgan";
 import { errorHandler } from "./middleware/error.middleware";
 import { notFound } from "./middleware/notFound.middleware";
 
-import routes from "./routes";
+import routes from "./routes/index";
 
 export const app = express();
 
@@ -18,6 +18,7 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 // API Routes
+console.log("setting app.ts routes")
 app.use("/api/v1", routes);
 
 // 404 Handler

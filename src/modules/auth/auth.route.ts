@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { register, login } from "./auth.controller";
+
 import { protect } from "../../middleware/auth.middleware";
+import { login, register } from "./auth.controller";
 
 const router = Router();
 
@@ -9,6 +10,7 @@ const router = Router();
   @desc    Register new user
   @access  Public
 */
+console.log("Register route accessed")
 router.post("/register", register);
 
 /*

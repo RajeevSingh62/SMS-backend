@@ -1,27 +1,20 @@
-/**
- * User schema for Auth
- * - bcrypt: password hashing
- * - role: RBAC (admin/teacher/student/parent)
- * - reset token fields for password reset flow
- */
-
 import bcrypt from "bcryptjs";
-import mongoose,{Schema,Document} from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export type UserRole = "admin" | "teacher" | "student" | "parent";
-export interface IUser extends Document{
-  name:string;
-  email:string;
- 
-  role:UserRole;
-  status:"active"|"inactive";
-  lastLogin?:Date;
-  resetPasswordToken?:string |null;
-  resetPasswordExpire?:Date|null;
-  password:string;
-  comparePassword(enteredPassword:string):Promise<boolean>;
-    resetPasswordExpires: { type: Date, default: null, select: false },
+
+export interface IUser extends Document {
+  name: string;
+  email: string;
+  role: UserRole;
+  status: "active" | "inactive";
+  lastLogin?: Date;
+  resetPasswordToken?: string | null;
+  resetPasswordExpires?: Date | null;
+  password: string;
+  comparePassword(enteredPassword: string): Promise<boolean>;
 }
+
 const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true, trim: true },
@@ -36,18 +29,15 @@ const userSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-// Hash password before save (only when modified)
-userSchema.pre("save", async function (next) {
-  // `this` is the document
-  if (!this.isModified("password")) return next();
+// FIXED: async hook -> no next()
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
-// Instance method to compare passwords
+// Instance method
 userSchema.methods.comparePassword = function (candidate: string) {
-  // note: password field is select: false by default, so when using this ensure you queried password
   return bcrypt.compare(candidate, this.password);
 };
 

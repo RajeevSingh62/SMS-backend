@@ -12,8 +12,8 @@ import { Request, Response, NextFunction } from "express";
  * - Ye global 404 handler hota hai jo SPA/API dono mein use hota hai.
  */
 export const notFound = (req: Request, res: Response, next: NextFunction) => {
-  res.status(404).json({
-    success: false,
-    message: `Route Not Found: ${req.originalUrl}`,
-  });
+  const error: any = new Error(`Route Not Found: ${req.originalUrl}`);
+  error.statusCode = 404;
+  next(error);   
 };
+
