@@ -8,5 +8,13 @@ export interface ITeacher extends Document{
 }
 
 const teacherSchema=new Schema<ITeacher>({
-    
-})
+    user:{type:Schema.Types.ObjectId,ref:"User",required:true},
+    subject:{type:String,required:true},
+    qualification:{type:String,required:true},
+    experience:{type:Number,required:true},
+
+},
+{timestamps:true}
+
+);
+export default mongoose.model<ITeacher>("Teacher",teacherSchema);
