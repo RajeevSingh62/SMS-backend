@@ -5,6 +5,7 @@ export interface ITeacher extends Document{
     subject:string;
     qualification:string;
     experience:number;
+    role:string;
 }
 
 const teacherSchema=new Schema<ITeacher>({
@@ -12,6 +13,7 @@ const teacherSchema=new Schema<ITeacher>({
     subject:{type:String,required:true},
     qualification:{type:String,required:true},
     experience:{type:Number,required:true},
+    role:{type:String,default:'teacher'},
 
 },
 {timestamps:true}
