@@ -10,6 +10,7 @@ export interface IStudent extends Document {
   parentName: string;
   parentPhone: string;
   address: string;
+  role:string;
 }
 
 const studentSchema = new Schema<IStudent>(
@@ -27,6 +28,7 @@ const studentSchema = new Schema<IStudent>(
     parentPhone: { type: String, required: true },
 
     address: { type: String, required: true },
+    role:{type:String,default:"student"},
   },
   { timestamps: true }
 );
