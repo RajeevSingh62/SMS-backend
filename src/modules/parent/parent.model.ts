@@ -6,10 +6,12 @@ export interface IParent extends Document{
     occupation:string;
     contactNumber: string;
   address: string;
+  role:string
 }
 
 const parentSchema=new Schema<IParent>({
     user:{type:Schema.Types.ObjectId,ref:'User',required:true},
+    role:{type:String,default:'parent'},
     children:{type:Schema.Types.ObjectId,ref:'Student',required:true},
     occupation:{type:String,required:true},
     contactNumber:{type:String,required:true},

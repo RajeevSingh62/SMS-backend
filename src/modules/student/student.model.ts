@@ -10,6 +10,7 @@ export interface IStudent extends Document {
   parentName: string;
   parentPhone: string;
   address: string;
+
   role:string;
 }
 
