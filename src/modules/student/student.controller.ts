@@ -1,102 +1,225 @@
 import { Request, Response } from "express";
-import { User } from "../auth/auth.model";
-import Student from "./student.model";
+import  Student  from "./student.model";
+import Parent from "../parent/parent.model";
 
-// Create student
-export const createStudent = async (req: Request, res: Response) => {
+import StudentDoc from './../studentDoc/studentdoc.model';
+
+
+// ------------------------
+// CREATE STUDENT (Admission)
+// ------------------------
+export const admissionStudent = async (req: Request, res: Response) => {
   try {
+    /**
+     * Expected body:
+     * {
+     *   name, classId, sectionId,
+     *   parents: [parentId1, parentId2],
+     *   dateOfBirth, gender,
+     *   admissionDate, previousSchool,
+     *   address, photoUrl, rollNumber
+     * }
+     */
+
     const {
-      name,
-      email,
-      password,
-      rollNumber,
-      class: className,
-      section,
+      user,
+      classId,
+      sectionId,
+      parents = [],
       dateOfBirth,
+      gender,
       admissionDate,
-      parentName,
-      parentPhone,
+      previousSchool,
       address,
+      photoUrl,
+      rollNumber
     } = req.body;
 
-    // 1️⃣ Create user with role = student
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role: "student",
-    });
+    if (!user || !classId || !sectionId) {
+      return res.status(400).json({
+        success: false,
+        message: "name, classId, sectionId are required",
+      });
+    }
 
-    // 2️⃣ Create student profile linked to user
+    // Validate parents
+    if (parents.length > 0) {
+      const validParents = await Parent.find({ _id: { $in: parents } });
+
+      if (validParents.length !== parents.length) {
+        return res.status(400).json({
+          success: false,
+          message: "One or more parents not found",
+        });
+      }
+    }
+
+    // Create student directly (NO AUTH USER)
     const student = await Student.create({
-      user: user._id,
-      rollNumber,
-      class: className,
-      section,
+      user,
+      classId,
+      sectionId,
+      parents,
       dateOfBirth,
+      gender,
       admissionDate,
-      parentName,
-      parentPhone,
+      previousSchool,
       address,
+      photoUrl,
+      rollNumber,
     });
 
     return res.status(201).json({
       success: true,
-      message: "Student created successfully",
-      data: {
-        user,
-        student,
-      },
+      message: "Student admitted successfully",
+      data: student,
     });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: error.message });
+
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Server error",
+    });
   }
 };
 
 
-// Get all students
+// ------------------------
+// ATTACH DOCUMENT
+// ------------------------
+export const attachDocument = async (req: Request, res: Response) => {
+  try {
+    const { studentId, fileUrl, fileName, fileType, size, tag } = req.body;
+
+    if (!studentId || !fileUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "studentId and fileUrl are required",
+      });
+    }
+
+    const student = await Student.findById(studentId);
+    if (!student)
+      return res.status(404).json({ success: false, message: "Student not found" });
+
+    const document = await StudentDoc.create({
+      student: studentId,
+      fileUrl,
+      fileName,
+      fileType,
+      size,
+      tag,
+    });
+
+    student.documents = [...(student.documents || []), document._id];
+    await student.save();
+
+    return res.status(201).json({
+      success: true,
+      data: document,
+    });
+
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
+// ------------------------
+// GET ALL STUDENTS
+// ------------------------
 export const getAllStudents = async (req: Request, res: Response) => {
   try {
-    const students = await Student.find().populate("user", "name email role");
+    const { classId, sectionId, status } = req.query;
+    const filter: any = {};
+
+    if (classId) filter.classId = classId;
+    if (sectionId) filter.sectionId = sectionId;
+    if (status) filter.status = status;
+
+    const students = await Student.find(filter)
+      .populate("parents")
+      .populate("documents");
 
     return res.json({
       success: true,
       count: students.length,
       data: students,
     });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: error.message });
+
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
   }
 };
 
 
-// Get single student
+// ------------------------
+// GET STUDENT BY ID
+// ------------------------
 export const getStudentById = async (req: Request, res: Response) => {
   try {
-    const student = await Student.findById(req.params.id).populate("user");
+    const student = await Student.findById(req.params.id)
+      .populate("parents")
+      .populate("documents");
 
     if (!student)
       return res.status(404).json({ success: false, message: "Student not found" });
 
     return res.json({ success: true, data: student });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: error.message });
+
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
   }
 };
 
 
-// Delete student
-export const deleteStudent = async (req: Request, res: Response) => {
+// ------------------------
+// UPDATE STUDENT
+// ------------------------
+export const updateStudent = async (req: Request, res: Response) => {
   try {
-    const student = await Student.findById(req.params.id);
+    const updates = req.body;
+
+    const student = await Student.findByIdAndUpdate(
+      req.params.id,
+      updates,
+      { new: true }
+    )
+      .populate("parents")
+      .populate("documents");
+
     if (!student)
       return res.status(404).json({ success: false, message: "Student not found" });
 
-    await User.findByIdAndDelete(student.user);
-    await student.deleteOne();
+    return res.json({ success: true, data: student });
 
-    return res.json({ success: true, message: "Student removed" });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: error.message });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
+// ------------------------
+// DEACTIVATE STUDENT (soft delete)
+// ------------------------
+export const deactivateStudent = async (req: Request, res: Response) => {
+  try {
+    const student = await Student.findByIdAndUpdate(
+      req.params.id,
+      { status: "inactive" },
+      { new: true }
+    );
+
+    if (!student)
+      return res.status(404).json({ success: false, message: "Student not found" });
+
+    return res.json({
+      success: true,
+      message: "Student deactivated",
+      data: student,
+    });
+
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
   }
 };

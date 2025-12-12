@@ -1,16 +1,18 @@
 import { Router } from "express";
 import {
-  createStudent,
+
+  admissionStudent,
+  deactivateStudent,
   getAllStudents,
   getStudentById,
-  deleteStudent,
+
 } from "./student.controller";
 
 const router = Router();
 
-router.post("/", createStudent);
+router.post("/", admissionStudent);
 router.get("/", getAllStudents);
 router.get("/:id", getStudentById);
-router.delete("/:id", deleteStudent);
+router.delete("/:id", deactivateStudent);
 
 export default router;
