@@ -1,5 +1,5 @@
 require('dotenv').config();
-import multer from "multer";
+import multer from "multer"
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 import cloudinary from "../utils/claudnary";
   //  console.log('Cloudinary config:', process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY, process.env.CLOUDINARY_API_SECRET);
