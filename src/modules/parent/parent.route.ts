@@ -8,3 +8,5 @@ router.get("/all",getAllParent);
 router.get("/:id",getParentById);
 router.patch("/:id",updateParent);
 router.delete("/:id",deleteParent)
+
+export  default router;
