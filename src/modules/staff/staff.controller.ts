@@ -10,14 +10,15 @@ export const  createStaff = async (req: Request, res: Response) => {
     }
   }
 
-//   getAllStaff: async (req: Request, res: Response) => {
-//     try {
-//       const staff = await Staff.find();
-//       return res.status(200).json({ success: true, staff });
-//     } catch (err: any) {
-//       return res.status(500).json({ success: false, message: err.message });
-//     }
-//   },
+  export const getAllStaff=async (req: Request, res: Response) => {
+    try {
+      const staff = await Staff.find();
+      return res.status(200).json({ success: true, data:staff });
+    } 
+    catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
 
 //   getStaff: async (req: Request, res: Response) => {
 //     try {

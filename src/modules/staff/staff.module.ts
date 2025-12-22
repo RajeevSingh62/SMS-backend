@@ -16,7 +16,7 @@ const staffSchema = new Schema<IStaff>(
     phone: { type: String, required: true },
     role: {
       type: String,
-      enum: ["TEACHER", "ACCOUNTANT", "ADMIN", "OTHER"],
+      enum: ["TEACHER", "ACCOUNTANT", "ADMIN", "staff"],
       required: true,
     },
     qualification: { type: String },
