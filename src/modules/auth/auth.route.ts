@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { protect } from "../../middleware/auth.middleware";
 import { login, register } from "./auth.controller";
-
+import upload from "../../middleware/upload";
 const router = Router();
 
 /*
@@ -11,7 +11,11 @@ const router = Router();
   @access  Public
 */
 console.log("Register route accessed")
-router.post("/register", register);
+router.post(
+  "/register",
+  upload.single("avatar"), 
+  register
+);
 
 /*
   @route   POST /api/auth/login

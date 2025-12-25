@@ -40,11 +40,13 @@ export const register = async (
         message: "Email already registered",
       });
     }
+    const avatar = req.file?.path;
 
     const user = await User.create({
       name,
       email,
       password,
+      avatar,
       role: role || "student",
     });
 
@@ -58,6 +60,7 @@ export const register = async (
         name: user.name,
         email: user.email,
         role: user.role,
+        avatar:user.avatar,
         token,
       },
     });

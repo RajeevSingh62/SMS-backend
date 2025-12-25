@@ -4,6 +4,7 @@ export interface IStaff extends Document {
   name: string;
   email: string;
   phone: string;
+  avatar:string;
   role: "TEACHER" | "ACCOUNTANT" | "ADMIN" | "OTHER";
   qualification: string;
   joinDate: Date;
@@ -19,6 +20,7 @@ const staffSchema = new Schema<IStaff>(
       enum: ["TEACHER", "ACCOUNTANT", "ADMIN", "staff"],
       required: true,
     },
+    avatar: { type: String, required: true },
     qualification: { type: String },
     joinDate: { type: Date, default: Date.now },
   },

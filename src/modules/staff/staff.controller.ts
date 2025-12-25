@@ -1,14 +1,27 @@
 import { Request, Response } from "express";
 import Staff from "./staff.module";
 
-export const  createStaff = async (req: Request, res: Response) => {
-    try {
-      const staff = await Staff.create(req.body);
-      return res.status(201).json({ success: true, staff });
-    } catch (err: any) {
-      return res.status(500).json({ success: false, message: err.message });
-    }
-  };
+export const createStaff = async (req: Request, res: Response) => {
+  try {
+    const avatar = req.file?.path; 
+
+    const staff = await Staff.create({
+      ...req.body,
+      avatar,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: staff,
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 
   export const getAllStaff=async (req: Request, res: Response) => {
     try {
@@ -29,16 +42,32 @@ export const  createStaff = async (req: Request, res: Response) => {
     }
   }
 
-  export const updateStaff=async (req: Request, res: Response) => {
-    try {
-      const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-      });
-      return res.status(200).json({ success: true, staff });
-    } catch (err: any) {
-      return res.status(500).json({ success: false, message: err.message });
+export const updateStaff = async (req: Request, res: Response) => {
+  try {
+    const updateData: any = { ...req.body };
+
+    if (req.file) {
+      updateData.avatar = req.file.path;
     }
+
+    const staff = await Staff.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: staff,
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
+};
+
 
   export const deleteStaff=async (req: Request, res: Response) => {
     try {

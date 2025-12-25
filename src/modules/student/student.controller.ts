@@ -10,17 +10,6 @@ import StudentDoc from './../studentDoc/studentdoc.model';
 // ------------------------
 export const admissionStudent = async (req: Request, res: Response) => {
   try {
-    /**
-     * Expected body:
-     * {
-     *   name, classId, sectionId,
-     *   parents: [parentId1, parentId2],
-     *   dateOfBirth, gender,
-     *   admissionDate, previousSchool,
-     *   address, photoUrl, rollNumber
-     * }
-     */
-
     const {
       user,
       classId,
@@ -31,21 +20,19 @@ export const admissionStudent = async (req: Request, res: Response) => {
       admissionDate,
       previousSchool,
       address,
-      photoUrl,
-      rollNumber
+      rollNumber,
     } = req.body;
 
     if (!user || !classId || !sectionId) {
       return res.status(400).json({
         success: false,
-        message: "name, classId, sectionId are required",
+        message: "user, classId, sectionId are required",
       });
     }
 
     // Validate parents
     if (parents.length > 0) {
       const validParents = await Parent.find({ _id: { $in: parents } });
-
       if (validParents.length !== parents.length) {
         return res.status(400).json({
           success: false,
@@ -54,7 +41,8 @@ export const admissionStudent = async (req: Request, res: Response) => {
       }
     }
 
-    // Create student directly (NO AUTH USER)
+    const avatar = req.file?.path;
+
     const student = await Student.create({
       user,
       classId,
@@ -65,8 +53,8 @@ export const admissionStudent = async (req: Request, res: Response) => {
       admissionDate,
       previousSchool,
       address,
-      photoUrl,
       rollNumber,
+      avatar, // ✅ stored URL
     });
 
     return res.status(201).json({
@@ -74,7 +62,6 @@ export const admissionStudent = async (req: Request, res: Response) => {
       message: "Student admitted successfully",
       data: student,
     });
-
   } catch (err: any) {
     return res.status(500).json({
       success: false,
@@ -82,6 +69,7 @@ export const admissionStudent = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 
 // ------------------------
@@ -178,7 +166,12 @@ export const getStudentById = async (req: Request, res: Response) => {
 // ------------------------
 export const updateStudent = async (req: Request, res: Response) => {
   try {
-    const updates = req.body;
+    const updates: any = { ...req.body };
+
+  
+    if (req.file) {
+      updates.avatar = req.file.path;
+    }
 
     const student = await Student.findByIdAndUpdate(
       req.params.id,
@@ -188,15 +181,22 @@ export const updateStudent = async (req: Request, res: Response) => {
       .populate("parents")
       .populate("documents");
 
-    if (!student)
-      return res.status(404).json({ success: false, message: "Student not found" });
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
 
-    return res.json({ success: true, data: student });
-
+    return res.json({
+      success: true,
+      data: student,
+    });
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 
 // ------------------------

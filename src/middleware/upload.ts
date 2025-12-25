@@ -1,17 +1,16 @@
-require('dotenv').config();
-import multer from "multer"
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../utils/claudnary";
-  //  console.log('Cloudinary config:', process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY, process.env.CLOUDINARY_API_SECRET);
+
 const storage = new CloudinaryStorage({
-  
   cloudinary,
-  params: {
-    folder: 'cms-posts',
-    allowed_formats: ['jpg', 'jpeg', 'png','avif'],
-  },
+  params: async () => ({
+    folder: "user-avatars",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 300, height: 300, crop: "fill" }],
+  }),
 });
 
 const upload = multer({ storage });
 
-module.exports = upload;
+export default upload;
