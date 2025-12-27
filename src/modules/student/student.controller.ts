@@ -1,60 +1,53 @@
 import { Request, Response } from "express";
 import  Student  from "./student.model";
 import Parent from "../parent/parent.model";
-
+import User from "../auth/auth.model";
+import bcrypt from "bcryptjs";
 import StudentDoc from './../studentDoc/studentdoc.model';
 
 
 // ------------------------
 // CREATE STUDENT (Admission)
 // ------------------------
+
+
 export const admissionStudent = async (req: Request, res: Response) => {
   try {
     const {
-      user,
+      name,
+      email,
+      password,
       classId,
       sectionId,
       parents = [],
       dateOfBirth,
       gender,
-      admissionDate,
-      previousSchool,
       address,
-      rollNumber,
     } = req.body;
 
-    if (!user || !classId || !sectionId) {
-      return res.status(400).json({
-        success: false,
-        message: "user, classId, sectionId are required",
-      });
-    }
+    // if (!name || !email || !password || !classId || !sectionId) {
+    //   return res.status(400).json({ message: "Required fields missing" });
+    // }
 
-    // Validate parents
-    if (parents.length > 0) {
-      const validParents = await Parent.find({ _id: { $in: parents } });
-      if (validParents.length !== parents.length) {
-        return res.status(400).json({
-          success: false,
-          message: "One or more parents not found",
-        });
-      }
-    }
+    // 1️⃣ Create User
+    const hashed = await bcrypt.hash(password, 10);
 
-    const avatar = req.file?.path;
+    const user = await User.create({
+      name,
+      email,
+      password: hashed,
+      role: "student",
+    });
 
+    // 2️⃣ Create Student
     const student = await Student.create({
-      user,
+      user: user._id,
       classId,
       sectionId,
       parents,
       dateOfBirth,
       gender,
-      admissionDate,
-      previousSchool,
       address,
-      rollNumber,
-      avatar, // ✅ stored URL
     });
 
     return res.status(201).json({
@@ -62,55 +55,14 @@ export const admissionStudent = async (req: Request, res: Response) => {
       message: "Student admitted successfully",
       data: student,
     });
+
   } catch (err: any) {
-    return res.status(500).json({
-      success: false,
-      message: err.message || "Server error",
-    });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 
 
-// ------------------------
-// ATTACH DOCUMENT
-// ------------------------
-export const attachDocument = async (req: Request, res: Response) => {
-  try {
-    const { studentId, fileUrl, fileName, fileType, size, tag } = req.body;
-
-    if (!studentId || !fileUrl) {
-      return res.status(400).json({
-        success: false,
-        message: "studentId and fileUrl are required",
-      });
-    }
-
-    const student = await Student.findById(studentId);
-    if (!student)
-      return res.status(404).json({ success: false, message: "Student not found" });
-
-    const document = await StudentDoc.create({
-      student: studentId,
-      fileUrl,
-      fileName,
-      fileType,
-      size,
-      tag,
-    });
-
-    student.documents = [...(student.documents || []), document._id];
-    await student.save();
-
-    return res.status(201).json({
-      success: true,
-      data: document,
-    });
-
-  } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
-  }
-};
 
 
 // ------------------------
