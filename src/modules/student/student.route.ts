@@ -12,7 +12,7 @@ import upload from "../../middleware/upload";
 
 const router = Router();
 
-router.post("/",upload.single("avatar"), admissionStudent);
+router.post("/", admissionStudent);
 router.get("/", getAllStudents);
 router.get("/:id", getStudentById);
 router.put("/:id",upload.single("avatar"),updateStudent);
