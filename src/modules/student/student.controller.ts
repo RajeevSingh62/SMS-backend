@@ -23,6 +23,8 @@ export const admissionStudent = async (req: Request, res: Response) => {
       dateOfBirth,
       gender,
       address,
+        documentUrl,   
+  status, 
     } = req.body;
 
     // if (!name || !email || !password || !classId || !sectionId) {
@@ -48,6 +50,8 @@ export const admissionStudent = async (req: Request, res: Response) => {
       dateOfBirth,
       gender,
       address,
+        documentUrl,   
+  status, 
     });
 
     return res.status(201).json({
