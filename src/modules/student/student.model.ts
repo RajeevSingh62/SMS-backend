@@ -16,6 +16,7 @@ export interface IStudent extends Document {
   address?: string;
   avatar?: string;
   status: "active" | "inactive";
+  documentUrl:"string"
   documents?: mongoose.Types.ObjectId[]; // refs to StudentDoc
 }
 
@@ -33,6 +34,7 @@ const studentSchema = new Schema<IStudent>(
     previousSchool: { type: String },
     address: { type: String },
     avatar: { type: String },
+    documentUrl: { type: String },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
     documents: [{ type: Schema.Types.ObjectId, ref: "StudentDoc" }],
   },
