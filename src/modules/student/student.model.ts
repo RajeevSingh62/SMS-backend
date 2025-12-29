@@ -24,7 +24,7 @@ const studentSchema = new Schema<IStudent>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
     admissionNumber: { type: String, required: true },
-    rollNumber: { type: String,  sparse: true },
+    rollNumber: { type: String},
     classId: { type: Schema.Types.ObjectId, ref: "Class" },
     sectionId: { type: Schema.Types.ObjectId, ref: "Section" },
     parents: [{ type: Schema.Types.ObjectId, ref: "Parent" }],
