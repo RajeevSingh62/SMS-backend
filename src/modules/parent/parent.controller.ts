@@ -5,31 +5,52 @@ import Parent from "./parent.model";
 
 
 // CREATE PARENT
+import { Request, Response } from "express";
+import Parent from "./parent.model";
+import User from "../user/user.model";
+
 export const createParent = async (req: Request, res: Response) => {
   try {
-    const { user, children, occupation, contactNumber, address } = req.body;
+    const {
+      name,
+      email,
+      password,
+      occupation,
+      contactNumber,
+      address
+    } = req.body;
 
+    // 1️⃣ Create User first
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: "parent"
+    });
+
+    // 2️⃣ Create Parent profile
     const parent = await Parent.create({
-      user,
-      children,
+      user: user._id,
       occupation,
       contactNumber,
       address,
+      children: []
     });
 
     return res.status(201).json({
       success: true,
       message: "Parent created successfully",
-      data: parent,
+      data: parent
     });
 
-  } catch (error: any) {
+  } catch (err: any) {
     return res.status(500).json({
       success: false,
-      message: error.message || "Internal server error",
+      message: err.message
     });
   }
 };
+
 
 
 // GET ALL PARENTS
