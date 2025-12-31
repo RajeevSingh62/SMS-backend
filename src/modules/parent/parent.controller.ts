@@ -1,5 +1,4 @@
-import { Request,Response } from "express";
-import Parent from "./parent.model";
+
 
 
 
@@ -7,7 +6,7 @@ import Parent from "./parent.model";
 // CREATE PARENT
 import { Request, Response } from "express";
 import Parent from "./parent.model";
-import User from "../user/user.model";
+import User from "../auth/auth.model";
 
 export const createParent = async (req: Request, res: Response) => {
   try {

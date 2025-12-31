@@ -1,3 +1,5 @@
+import mongoose, { Schema, Document } from "mongoose";
+
 export interface IParent extends Document {
   user: mongoose.Types.ObjectId;
   children: mongoose.Types.ObjectId[];
