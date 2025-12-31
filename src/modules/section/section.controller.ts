@@ -57,7 +57,7 @@ export const getAllSections = async (req: Request, res: Response) => {
     if (classId) filter.classId = classId;
 
     const sections = await Section.find(filter)
-      .populate("classId", "name","capacity")
+      .populate("classId", "name")
       .sort({ name: 1 });
 
     return res.json({
