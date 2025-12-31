@@ -7,7 +7,7 @@ import Class from "../classes/classes.model";
 // ------------------------
 export const createSection = async (req: Request, res: Response) => {
   try {
-    const { name, classId } = req.body;
+    const { name, classId,capacity } = req.body;
 
     if (!name || !classId) {
       return res.status(400).json({
@@ -34,7 +34,7 @@ export const createSection = async (req: Request, res: Response) => {
       });
     }
 
-    const section = await Section.create({ name, classId });
+    const section = await Section.create({ name, classId,capacity });
 
     return res.status(201).json({
       success: true,
@@ -57,7 +57,7 @@ export const getAllSections = async (req: Request, res: Response) => {
     if (classId) filter.classId = classId;
 
     const sections = await Section.find(filter)
-      .populate("classId", "name")
+      .populate("classId", "name","capacity")
       .sort({ name: 1 });
 
     return res.json({
