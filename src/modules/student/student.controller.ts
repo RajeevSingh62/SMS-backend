@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import  Student  from "./student.model";
+import Student from "./student.model";
 import Parent from "../parent/parent.model";
 import User from "../auth/auth.model";
 import bcrypt from "bcryptjs";
@@ -23,8 +23,8 @@ export const admissionStudent = async (req: Request, res: Response) => {
       dateOfBirth,
       gender,
       address,
-        documentUrl,   
-  status, 
+      documentUrl,
+      status,
     } = req.body;
 
     // if (!name || !email || !password || !classId || !sectionId) {
@@ -50,8 +50,8 @@ export const admissionStudent = async (req: Request, res: Response) => {
       dateOfBirth,
       gender,
       address,
-        documentUrl,   
-  status, 
+      documentUrl,
+      status,
     });
 
     return res.status(201).json({
@@ -124,7 +124,7 @@ export const updateStudent = async (req: Request, res: Response) => {
   try {
     const updates: any = { ...req.body };
 
-  
+
     if (req.file) {
       updates.avatar = req.file.path;
     }

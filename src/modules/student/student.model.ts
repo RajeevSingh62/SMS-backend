@@ -23,7 +23,7 @@ export interface IStudent extends Document {
 const studentSchema = new Schema<IStudent>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
-    admissionNumber: { type: String, required: true },
+    admissionNumber: { type: String},
     rollNumber: { type: String},
     classId: { type: Schema.Types.ObjectId, ref: "Class" },
     sectionId: { type: Schema.Types.ObjectId, ref: "Section" },
@@ -46,12 +46,12 @@ const studentSchema = new Schema<IStudent>(
  * Format: YYYYMMDD + last 4 of ObjectId (or random) => ensures uniqueness practically.
  * In future you can replace with a counter collection for sequential IDs.
  */
-studentSchema.pre<IStudent>("validate", async function () {
-  if (!this.admissionNumber) {
-    const datePrefix = new Date().toISOString().slice(0,10).replace(/-/g,""); // YYYYMMDD
-    const short = (this._id?.toString().slice(-4)) || Math.floor(Math.random()*9000+1000).toString();
-    this.admissionNumber = `A${datePrefix}${short}`;
-  }
-});
+// studentSchema.pre<IStudent>("validate", async function () {
+//   if (!this.admissionNumber) {
+//     const datePrefix = new Date().toISOString().slice(0,10).replace(/-/g,""); // YYYYMMDD
+//     const short = (this._id?.toString().slice(-4)) || Math.floor(Math.random()*9000+1000).toString();
+//     this.admissionNumber = `A${datePrefix}${short}`;
+//   }
+// });
 
 export default mongoose.model<IStudent>("Student",studentSchema);
