@@ -23,7 +23,7 @@ export interface IStudent extends Document {
 const studentSchema = new Schema<IStudent>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
-    admissionNumber: { type: String},
+ 
     rollNumber: { type: String},
     classId: { type: Schema.Types.ObjectId, ref: "Class" },
     sectionId: { type: Schema.Types.ObjectId, ref: "Section" },
