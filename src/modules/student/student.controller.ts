@@ -4,6 +4,9 @@ import Parent from "../parent/parent.model";
 import User from "../auth/auth.model";
 import bcrypt from "bcryptjs";
 import StudentDoc from './../studentDoc/studentdoc.model';
+import { createMonthlyFeeOnAdmission } from "../fee/fee-service";
+import { StudentMonthlyFee } from "../fee/student-monthly-fee.model";
+import { FeeTemplate } from "../fee/fee-template.model";
 
 
 // ------------------------
@@ -53,6 +56,34 @@ export const admissionStudent = async (req: Request, res: Response) => {
       documentUrl,
       status,
     });
+// After student is created
+const feeTemplate = await FeeTemplate.findOne({
+  classId: student.classId,
+});
+
+if (feeTemplate) {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+ await StudentMonthlyFee.create({
+  studentId: student._id,
+  classId: student.classId,
+  month,
+  year,
+
+  baseFee: feeTemplate.monthlyFee,
+  examFee: 0,
+  miscFee: 0,
+
+  totalAmount: feeTemplate.monthlyFee,
+  paidAmount: 0,
+  dueAmount: feeTemplate.monthlyFee,
+
+  status: "PENDING",
+});
+
+}
 
     return res.status(201).json({
       success: true,
