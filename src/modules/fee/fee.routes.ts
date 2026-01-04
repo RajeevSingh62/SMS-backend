@@ -6,7 +6,7 @@ import { addExamFee, addMiscFee, createFeeTemplate, createStudentMonthlyFee, get
 const router = Router();
 
 // router.post("/StudentMonthlyFee",createStudentMonthlyFee);
-router.get("/getStudentFee/:id",getStudentFees);
+router.get("/getStudentFee/:studentId",getStudentFees);
 
 router.post("/add-exam-fee", addExamFee);
 router.post("/add-misc-fee",addMiscFee);
