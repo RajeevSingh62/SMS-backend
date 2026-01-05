@@ -9,6 +9,7 @@ import attendanceRoutes from "../modules/attendance/attendance.route";
 import sectionRoutes from "../modules/section/section.routes";
 import classRoutes from "../modules/classes/classes.routes";
 import feeRoutes from "../modules/fee/fee.routes";
+import admindashboardRoute from "../modules/dashboard/admin-dashboard.routes"
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -23,6 +24,7 @@ router.use("/attendance",attendanceRoutes);
 router.use("/section",sectionRoutes);
 router.use("/class",classRoutes);
 router.use("/fee",feeRoutes);
+router.use("/admindashboard",admindashboardRoute);
 
 
 export default router;

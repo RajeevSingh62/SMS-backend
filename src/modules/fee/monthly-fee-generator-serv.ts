@@ -9,7 +9,7 @@ export const generateMonthlyFees = async () => {
   const year = now.getFullYear();
 
 
-  console.log(`📅 Generating fees for ${month}/${year}`);
+
 
   console.log(`📅 Generating fees for ${month}/${year}`);
 
