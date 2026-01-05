@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/error.middleware";
 import { notFound } from "./middleware/notFound.middleware";
 
 import routes from "./routes/index";
+import { startFeeCron } from "./modules/cron/fee-cron";
 
 export const app = express();
 
@@ -17,6 +18,7 @@ app.use(cors({
   origin: ["http://localhost:5173","http://localhost:5174"],
   credentials: true
 }));
+startFeeCron();
 app.use(helmet());
 app.use(morgan("dev"));
 
