@@ -14,10 +14,17 @@ export const app = express();
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({
-  origin: ["http://localhost:5173","http://localhost:5174"],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://myschool.dedyn.io"
+    ],
+    credentials: true,
+  })
+);
+
 startFeeCron();
 app.use(helmet());
 app.use(morgan("dev"));
