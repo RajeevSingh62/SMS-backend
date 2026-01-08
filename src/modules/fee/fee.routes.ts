@@ -1,11 +1,12 @@
 import { Router } from "express";
 
 
-import { addExamFee, addMiscFee, createFeeTemplate, createStudentMonthlyFee, getStudentFees, payFee } from "./fee.controller";
+import { addExamFee, addMiscFee, createFeeTemplate, createStudentMonthlyFee, getAllMonthlyFees, getStudentFees, payFee } from "./fee.controller";
 
 const router = Router();
 
-// router.post("/StudentMonthlyFee",createStudentMonthlyFee);
+
+router.get("/getAllMonthlyfee",getAllMonthlyFees);
 router.get("/getStudentFee/:studentId",getStudentFees);
 
 router.post("/add-exam-fee", addExamFee);

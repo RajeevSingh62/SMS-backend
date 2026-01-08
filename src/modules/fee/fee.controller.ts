@@ -148,6 +148,10 @@ export const getStudentFees = async (req: Request, res: Response) => {
       studentId: studentId,
     })
       .populate("classId")
+      .populate({
+        path: "studentId",
+        populate: { path: "user", select: "name email" }
+      })
       .sort({ year: -1, month: -1 });
 
     res.json({
@@ -159,3 +163,29 @@ export const getStudentFees = async (req: Request, res: Response) => {
   }
 };
 
+export const getAllMonthlyFees = async (req: Request, res: Response) => {
+  try {
+    const { month, year, status } = req.query;
+
+    const filter: any = {};
+    if (month) filter.month = Number(month);
+    if (year) filter.year = Number(year);
+    if (status) filter.status = status;
+
+    const fees = await StudentMonthlyFee.find(filter)
+      .populate({
+        path: "studentId",
+        populate: { path: "user", select: "name email" }
+      })
+      .populate("classId")
+      .sort({ year: -1, month: -1 });
+
+    res.json({
+      success: true,
+      count: fees.length,
+      data: fees,
+    });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
