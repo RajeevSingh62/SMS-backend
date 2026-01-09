@@ -148,8 +148,26 @@ export const getAllStudents = async (req: Request, res: Response) => {
 export const getStudentById = async (req: Request, res: Response) => {
   try {
     const student = await Student.findById(req.params.id)
-      .populate("parents")
-      .populate("documents");
+      .populate({
+        path: "classId",
+        select: "name", 
+      })
+      .populate({
+        path: "user",
+        select: "name email", 
+      })
+    .populate({
+        path: "parents",
+        populate: {
+          path: "user",
+          select: "name phone email",
+        },
+      })
+       .populate({
+        path: "sectionId",
+        select: "name ", 
+      });
+ 
 
     if (!student)
       return res.status(404).json({ success: false, message: "Student not found" });
