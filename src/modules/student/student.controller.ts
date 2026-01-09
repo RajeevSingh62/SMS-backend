@@ -106,26 +106,40 @@ if (feeTemplate) {
 export const getAllStudents = async (req: Request, res: Response) => {
   try {
     const { classId, sectionId, status } = req.query;
-    const filter: any = {};
 
+    const filter: any = {};
     if (classId) filter.classId = classId;
     if (sectionId) filter.sectionId = sectionId;
     if (status) filter.status = status;
 
     const students = await Student.find(filter)
-      .populate("parents")
-      .populate("documents");
+      .populate({
+        path: "classId",
+        select: "name", 
+      })
+      .populate({
+        path: "user",
+        select: "name email", 
+      })
+      .populate({
+        path: "parents",
+        select: "name phone", 
+      });
+ 
 
-    return res.json({
+    return res.status(200).json({
       success: true,
       count: students.length,
       data: students,
     });
-
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
+
 
 
 // ------------------------
