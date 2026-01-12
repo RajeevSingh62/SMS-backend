@@ -27,27 +27,49 @@ declare global {
 export const protect = async (req: Request, res: Response, next: NextFunction) => {
   let token: string | undefined;
 
-  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+  // 1️⃣ Authorization header
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
     token = req.headers.authorization.split(" ")[1];
   }
 
+  // 2️⃣ Cookie fallback
+  if (!token && req.cookies?.token) {
+    token = req.cookies.token;
+  }
+
   if (!token) {
-    return res.status(401).json({ success: false, message: "Not authorized, token missing" });
+    return res.status(401).json({
+      success: false,
+      message: "Not authorized, token missing",
+    });
   }
 
   try {
-    const decoded = jwt.verify(token, ENV.JWT_SECRET) as { id: string; iat?: number; exp?: number };
+    const decoded = jwt.verify(token, ENV.JWT_SECRET) as { id: string };
 
-    // optional: fetch user from DB (to ensure still active)
     const user = await User.findById(decoded.id).select("role status");
-    if (!user) return res.status(401).json({ success: false, message: "User not found" });
-    if (user.status !== "active") return res.status(403).json({ success: false, message: "User is inactive" });
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
 
-    // attach id and role for downstream usage
-    req.user = { id: user._id.toString(), role: user.role };
+    if (user.status !== "active") {
+      return res.status(403).json({ message: "User inactive" });
+    }
+
+    req.user = {
+      id: user._id.toString(),
+      role: user.role,
+    };
 
     next();
   } catch (err) {
-    return res.status(401).json({ success: false, message: "Token invalid or expired" });
+    return res.status(401).json({
+      success: false,
+      message: "Token invalid or expired",
+    });
   }
 };
+

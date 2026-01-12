@@ -257,3 +257,21 @@ export const deactivateStudent = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+// student.controller.ts
+export const getMyStudentProfile = async (req: Request, res: Response) => {
+  const userId = req.user!.id; 
+
+  const student = await Student.findOne({ user: userId })
+    .populate("classId", "name")
+    .populate("sectionId", "name");
+
+  if (!student) {
+    return res.status(404).json({ message: "Student profile not found" });
+  }
+
+  res.json({
+    success: true,
+    data: student, // <-- gives STUDENT ID
+  });
+};
+
