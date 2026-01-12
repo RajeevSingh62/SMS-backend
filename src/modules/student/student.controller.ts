@@ -25,6 +25,7 @@ export const admissionStudent = async (req: Request, res: Response) => {
       parents = [],
       dateOfBirth,
       gender,
+      role,
       address,
       documentUrl,
       status,
@@ -40,7 +41,7 @@ export const admissionStudent = async (req: Request, res: Response) => {
     const user = await User.create({
       name,
       email,
-      password: hashed,
+      password,
       role: "student",
     });
 
@@ -129,6 +130,7 @@ export const getAllStudents = async (req: Request, res: Response) => {
         path: "parents",
         select: "name phone", 
       });
+    
  
 
     return res.status(200).json({
@@ -151,37 +153,46 @@ export const getAllStudents = async (req: Request, res: Response) => {
 // ------------------------
 export const getStudentById = async (req: Request, res: Response) => {
   try {
-    const student = await Student.findById(req.params.id)
+    const studentId = req.params.id;
+
+    const student = await Student.findById(studentId)
+      .populate("classId", "name")
+      .populate("sectionId", "name")
+      .populate("user", "name email")
       .populate({
-        path: "classId",
-        select: "name", 
-      })
-      .populate({
-        path: "user",
-        select: "name email", 
-      })
-    .populate({
         path: "parents",
         populate: {
           path: "user",
           select: "name phone email",
         },
-      })
-       .populate({
-        path: "sectionId",
-        select: "name ", 
       });
- 
 
-    if (!student)
-      return res.status(404).json({ success: false, message: "Student not found" });
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
 
-    return res.json({ success: true, data: student });
+    // 🔥 FETCH FEES SEPARATELY
+    const fees = await StudentMonthlyFee.find({ studentId })
+      .sort({ year: -1, month: -1 });
 
+    return res.status(200).json({
+      success: true,
+      data: {
+        student,
+        fees,
+      },
+    });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
+
 
 
 // ------------------------
