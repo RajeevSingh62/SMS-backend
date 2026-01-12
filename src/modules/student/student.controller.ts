@@ -121,6 +121,10 @@ export const getAllStudents = async (req: Request, res: Response) => {
         path: "user",
         select: "name email", 
       })
+          .populate({
+        path: "user",
+        select: "name ", 
+      })
       .populate({
         path: "parents",
         select: "name phone", 
