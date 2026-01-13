@@ -1,49 +1,55 @@
+// attendance.controller.ts
 import { Request, Response } from "express";
-import StudentAttendance from "./studentAttendance.model";
-import StaffAttendance from "./staffAttendance.model";
+import Attendance from "./attendance.model";
 
-export default {
-  // Mark student attendance
-  markStudent: async (req: Request, res: Response) => {
-    try {
-      const data = await StudentAttendance.create(req.body);
-      return res.status(201).json({ success: true, data });
-    } catch (err: any) {
-      return res.status(500).json({ success: false, message: err.message });
-    }
-  },
+export const markAttendance = async (req: Request, res: Response) => {
+  try {
+    const { date, classId, sectionId, records } = req.body;
 
-  // Mark staff attendance
-  markStaff: async (req: Request, res: Response) => {
-    try {
-      const data = await StaffAttendance.create(req.body);
-      return res.status(201).json({ success: true, data });
-    } catch (err: any) {
-      return res.status(500).json({ success: false, message: err.message });
-    }
-  },
+    const attendance = await Attendance.findOneAndUpdate(
+      { date, classId, sectionId },
+      {
+        date,
+        classId,
+        sectionId,
+        records,
+        markedBy: req.user!.id,
+      },
+      { upsert: true, new: true }
+    );
 
-  // Get student attendance
-  getStudentAttendance: async (req: Request, res: Response) => {
-    try {
-      const { studentId } = req.params;
-      const data = await StudentAttendance.find({ studentId }).sort({
-        date: -1,
-      });
-      return res.status(200).json({ success: true, data });
-    } catch (err: any) {
-      return res.status(500).json({ success: false, message: err.message });
-    }
-  },
+    res.json({
+      success: true,
+      message: "Attendance saved successfully",
+      data: attendance,
+    });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+export const getAttendanceByClass = async (req: Request, res: Response) => {
+  const { date, classId, sectionId } = req.query;
 
-  // Get staff attendance
-  getStaffAttendance: async (req: Request, res: Response) => {
-    try {
-      const { staffId } = req.params;
-      const data = await StaffAttendance.find({ staffId }).sort({ date: -1 });
-      return res.status(200).json({ success: true, data });
-    } catch (err: any) {
-      return res.status(500).json({ success: false, message: err.message });
-    }
-  },
+  const attendance = await Attendance.findOne({
+    date,
+    classId,
+    sectionId,
+  }).populate("records.studentId", "user");
+
+  res.json({
+    success: true,
+    data: attendance,
+  });
+};
+export const getMyAttendance = async (req: Request, res: Response) => {
+  // const studentId = req.studentId; // mapping later explain karunga
+
+  // const attendance = await Attendance.find({
+  //   "records.studentId": studentId,
+  // });
+
+  // res.json({
+  //   success: true,
+  //   data: attendance,
+  // });
 };
