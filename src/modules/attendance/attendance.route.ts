@@ -8,7 +8,7 @@ import {
 
 const router = Router();
 
-router.post("/", protect, markAttendance);
-router.get("/", protect, getAttendanceByClass);
+router.post("/",protect,markAttendance);
+router.get("/", getAttendanceByClass);
 
 export default router;

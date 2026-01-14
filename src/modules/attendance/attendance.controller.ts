@@ -5,6 +5,7 @@ import Attendance from "./attendance.model";
 export const markAttendance = async (req: Request, res: Response) => {
   try {
     const { date, classId, sectionId, records } = req.body;
+    console.log("req body",req.body)
 
     const attendance = await Attendance.findOneAndUpdate(
       { date, classId, sectionId },
@@ -17,13 +18,14 @@ export const markAttendance = async (req: Request, res: Response) => {
       },
       { upsert: true, new: true }
     );
-
+console.log(attendance)
     res.json({
       success: true,
       message: "Attendance saved successfully",
       data: attendance,
     });
   } catch (err: any) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
