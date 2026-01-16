@@ -81,84 +81,60 @@ export const getAllStudents = async (req: Request, res: Response) => {
 };
 
 
-export const getDailyAttendance = async (req:Request, res:Response) => {
+
+
+export const getDailyAttendance = async (req: Request, res: Response) => {
   try {
-    const { date, classId, sectionId } = req.query;
-
-    if (!date || !classId || !sectionId) {
-      return res.status(400).json({
-        success: false,
-        message: "date, classId and sectionId are required",
-      });
-    }
-
-    // 1️⃣ Check if attendance already exists
-    const existing = await Attendance.findOne({
+    const {
+      page = "1",
+      limit = "10",
       date,
       classId,
       sectionId,
-    });
+    } = req.query;
 
-    // ✅ CASE 1: Attendance already marked
-    if (existing) {
-      const students = await studentModel.find({
-        classId,
-        sectionId,
-        status: "active",
-      }).populate("user", "name")
-        .lean();
+    const filter: any = {};
 
-      const records = students.map((stu) => {
-        const found = existing.records.find(
-          (r) => r.studentId.toString() === stu._id.toString()
-        );
+    if (date) filter.date = date;
+    if (classId) filter.classId = classId;
+    if (sectionId) filter.sectionId = sectionId;
 
-        return {
-          studentId: stu._id,
-          name: (stu.user as any).name,
-          roll: stu.rollNumber,
-          status: found ? found.status : "PRESENT",
-        };
-      });
+    const skip = (Number(page) - 1) * Number(limit);
 
-      return res.json({
-        success: true,
-        data: {
-          date,
-          classId,
-          sectionId,
-          isMarked: true,
-          records,
-        },
-      });
-    }
+    const [data, total] = await Promise.all([
+      Attendance.find(filter)
+        .populate("classId", "name")
+        .populate("sectionId", "name")
+      .populate({
+  path: "records.studentId",
+  select: "rollNumber user",
+  populate: {
+    path: "user",
+    select: "name email",
+  },
+})
 
-    // ✅ CASE 2: Attendance NOT marked yet
-    const students = await studentModel.find({
-      classId,
-      sectionId,
-      status: "active",
-    }).populate("user", "name")
-      .lean();
+        .sort({ date: -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      Attendance.countDocuments(filter),
+    ]);
 
-    const records = students.map((stu) => ({
-      studentId: stu._id,
-      name: (stu.user as any)?.name,
-      roll: stu.rollNumber,
-      status: "PRESENT", // default
-    }));
-
-    return res.json({
+    res.json({
       success: true,
-      data: {
-        date,
-        classId,
-        sectionId,
-        isMarked: false,
-        records,
+      data,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        totalPages: Math.ceil(total / Number(limit)),
       },
     });
-  } catch (err:any) {
-    res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
+
