@@ -79,3 +79,86 @@ export const getAllStudents = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+export const getDailyAttendance = async (req:Request, res:Response) => {
+  try {
+    const { date, classId, sectionId } = req.query;
+
+    if (!date || !classId || !sectionId) {
+      return res.status(400).json({
+        success: false,
+        message: "date, classId and sectionId are required",
+      });
+    }
+
+    // 1️⃣ Check if attendance already exists
+    const existing = await Attendance.findOne({
+      date,
+      classId,
+      sectionId,
+    });
+
+    // ✅ CASE 1: Attendance already marked
+    if (existing) {
+      const students = await studentModel.find({
+        classId,
+        sectionId,
+        status: "active",
+      }).populate("user", "name")
+        .lean();
+
+      const records = students.map((stu) => {
+        const found = existing.records.find(
+          (r) => r.studentId.toString() === stu._id.toString()
+        );
+
+        return {
+          studentId: stu._id,
+          name: (stu.user as any).name,
+          roll: stu.rollNumber,
+          status: found ? found.status : "PRESENT",
+        };
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          date,
+          classId,
+          sectionId,
+          isMarked: true,
+          records,
+        },
+      });
+    }
+
+    // ✅ CASE 2: Attendance NOT marked yet
+    const students = await studentModel.find({
+      classId,
+      sectionId,
+      status: "active",
+    }).populate("user", "name")
+      .lean();
+
+    const records = students.map((stu) => ({
+      studentId: stu._id,
+      name: (stu.user as any)?.name,
+      roll: stu.rollNumber,
+      status: "PRESENT", // default
+    }));
+
+    return res.json({
+      success: true,
+      data: {
+        date,
+        classId,
+        sectionId,
+        isMarked: false,
+        records,
+      },
+    });
+  } catch (err:any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
