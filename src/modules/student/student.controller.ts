@@ -159,6 +159,7 @@ export const getStudentById = async (req: Request, res: Response) => {
       .populate("classId", "name")
       .populate("sectionId", "name")
       .populate("user", "name email")
+      .populate("fee", )
       .populate({
         path: "parents",
         populate: {
