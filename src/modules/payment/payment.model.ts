@@ -54,6 +54,7 @@ const paymentSchema = new Schema<IPayment>(
       type: Schema.Types.Mixed,
       default: {},
     },
+    
   },
   { timestamps: true }
 );
