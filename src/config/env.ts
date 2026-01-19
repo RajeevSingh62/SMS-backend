@@ -9,6 +9,10 @@ interface EnvConfig {
   CLOUDINARY_CLOUD_NAME: string;
   CLOUDINARY_API_KEY: string;
   CLOUDINARY_API_SECRET: string;
+  PAYU_KEY:string;
+PAYU_SALT:string;
+FRONTEND_URL:string;
+BACKEND_URL:string;
 }
 
 export const ENV: EnvConfig = {
@@ -19,6 +23,12 @@ export const ENV: EnvConfig = {
   CLOUDINARY_CLOUD_NAME: (process.env.CLOUDINARY_CLOUD_NAME as string),
   CLOUDINARY_API_KEY:( process.env.CLOUDINARY_API_KEY as string),
   CLOUDINARY_API_SECRET: (process.env.CLOUDINARY_API_SECRET as string),
+  PAYU_KEY: (process.env.PAYU_KEY as string),
+  PAYU_SALT: (process.env.PAYU_SALT as string),
+  FRONTEND_URL:process.env.FRONTEND_URL as string,
+  BACKEND_URL:process.env.BACKEND_URL as string
+
+
 };
 
 // password of mongo =r98a2FDwOIKKoja1
