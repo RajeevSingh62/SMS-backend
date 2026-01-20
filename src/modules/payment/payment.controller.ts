@@ -151,3 +151,17 @@ export const payUSuccess = async (req: Request, res: Response) => {
 
   res.redirect(`${ENV.FRONTEND_URL}/studentdashboard/payment-success`);
 };
+export const payUFailure = async (req: Request, res: Response) => {
+  const { txnid } = req.body;
+
+  const payment = await Payment.findOne({ txnId: txnid });
+
+  if (payment) {
+    payment.status = "FAILED";
+    payment.rawResponse = req.body;
+    await payment.save();
+  }
+
+  // ✅ redirect frontend failure page
+  return res.redirect(`${ENV.FRONTEND_URL}/studentdashboard/payment-failed`);
+};

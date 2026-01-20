@@ -34,6 +34,13 @@ export const admissionStudent = async (req: Request, res: Response) => {
     // if (!name || !email || !password || !classId || !sectionId) {
     //   return res.status(400).json({ message: "Required fields missing" });
     // }
+        const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered. Try another email.",
+      });
+    }
 
     // 1️⃣ Create User
     const hashed = await bcrypt.hash(password, 10);
