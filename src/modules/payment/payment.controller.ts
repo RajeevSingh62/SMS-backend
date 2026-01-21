@@ -149,7 +149,7 @@ export const payUSuccess = async (req: Request, res: Response) => {
     $set: { dueAmount: 0, status: "PAID" },
   });
 
-  res.redirect(`${ENV.FRONTEND_URL}/studentdashboard/payment-success`);
+  res.redirect(`${ENV.FRONTEND_URL}/payment-success`);
 };
 export const payUFailure = async (req: Request, res: Response) => {
   const { txnid } = req.body;
@@ -163,5 +163,5 @@ export const payUFailure = async (req: Request, res: Response) => {
   }
 
   // ✅ redirect frontend failure page
-  return res.redirect(`${ENV.FRONTEND_URL}/studentdashboard/payment-failed`);
+  return res.redirect(`${ENV.FRONTEND_URL}/payment-failure`);
 };
