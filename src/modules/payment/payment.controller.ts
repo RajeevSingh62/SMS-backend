@@ -150,6 +150,7 @@ export const payUSuccess = async (req: Request, res: Response) => {
   });
 
   res.redirect(`${ENV.FRONTEND_URL}/payment-success`);
+  res.redirect(`${ENV.FRONTEND_URL}/payment-success`);
 };
 export const payUFailure = async (req: Request, res: Response) => {
   const { txnid } = req.body;
