@@ -6,7 +6,7 @@ import studentModel from "../student/student.model";
 export const markAttendance = async (req: Request, res: Response) => {
   try {
     const { date, classId, sectionId, records } = req.body;
-    console.log("req body",req.body)
+    console.log("req body", req.body);
 
     const attendance = await Attendance.findOneAndUpdate(
       { date, classId, sectionId },
@@ -17,9 +17,9 @@ export const markAttendance = async (req: Request, res: Response) => {
         records,
         markedBy: req.user!.id,
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
-console.log(attendance)
+    console.log(attendance);
     res.json({
       success: true,
       message: "Attendance saved successfully",
@@ -44,18 +44,28 @@ export const getAttendanceByClass = async (req: Request, res: Response) => {
     data: attendance,
   });
 };
+
+
 export const getMyAttendance = async (req: Request, res: Response) => {
-  // const studentId = req.studentId; // mapping later explain karunga
+  try {
+    const { id } = req.params;
 
-  // const attendance = await Attendance.find({
-  //   "records.studentId": studentId,
-  // });
+    const attendance = await Attendance.find({
+      "records.studentId": id,
+    });
 
-  // res.json({
-  //   success: true,
-  //   data: attendance,
-  // });
+    res.json({
+      success: true,
+      data: attendance,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 };
+
 // student.controller.ts
 export const getAllStudents = async (req: Request, res: Response) => {
   try {
@@ -66,7 +76,8 @@ export const getAllStudents = async (req: Request, res: Response) => {
     if (sectionId) filter.sectionId = sectionId;
     if (status) filter.status = status;
 
-    const students = await studentModel.find(filter)
+    const students = await studentModel
+      .find(filter)
       .populate("user", "name email")
       .populate("classId", "name")
       .populate("sectionId", "name");
@@ -80,18 +91,9 @@ export const getAllStudents = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
 export const getDailyAttendance = async (req: Request, res: Response) => {
   try {
-    const {
-      page = "1",
-      limit = "10",
-      date,
-      classId,
-      sectionId,
-    } = req.query;
+    const { page = "1", limit = "10", date, classId, sectionId } = req.query;
 
     const filter: any = {};
 
@@ -105,14 +107,14 @@ export const getDailyAttendance = async (req: Request, res: Response) => {
       Attendance.find(filter)
         .populate("classId", "name")
         .populate("sectionId", "name")
-      .populate({
-  path: "records.studentId",
-  select: "rollNumber user",
-  populate: {
-    path: "user",
-    select: "name email",
-  },
-})
+        .populate({
+          path: "records.studentId",
+          select: "rollNumber user",
+          populate: {
+            path: "user",
+            select: "name email",
+          },
+        })
 
         .sort({ date: -1 })
         .skip(skip)
@@ -137,4 +139,3 @@ export const getDailyAttendance = async (req: Request, res: Response) => {
     });
   }
 };
-
