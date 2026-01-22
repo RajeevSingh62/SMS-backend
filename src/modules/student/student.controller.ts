@@ -7,6 +7,7 @@ import StudentDoc from './../studentDoc/studentdoc.model';
 import { createMonthlyFeeOnAdmission } from "../fee/fee-service";
 import { StudentMonthlyFee } from "../fee/student-monthly-fee.model";
 import { FeeTemplate } from "../fee/fee-template.model";
+import Attendance from "../attendance/attendance.model";
 
 
 // ------------------------
@@ -158,6 +159,8 @@ export const getAllStudents = async (req: Request, res: Response) => {
 // ------------------------
 // GET STUDENT BY ID
 // ------------------------
+
+
 export const getStudentById = async (req: Request, res: Response) => {
   try {
     const studentId = req.params.id;
@@ -166,7 +169,7 @@ export const getStudentById = async (req: Request, res: Response) => {
       .populate("classId", "name")
       .populate("sectionId", "name")
       .populate("user", "name email")
-      .populate("fee", )
+      .populate("fee") // FeeTemplate
       .populate({
         path: "parents",
         populate: {
@@ -182,15 +185,41 @@ export const getStudentById = async (req: Request, res: Response) => {
       });
     }
 
-    // 🔥 FETCH FEES SEPARATELY
-    const fees = await StudentMonthlyFee.find({ studentId })
-      .sort({ year: -1, month: -1 });
+    // ✅ FETCH FEES SEPARATELY
+    const fees = await StudentMonthlyFee.find({ studentId }).sort({
+      year: -1,
+      month: -1,
+    });
+
+    // ✅ FETCH ATTENDANCE HISTORY (student wise)
+    const attendance = await Attendance.find({
+      "records.studentId": studentId,
+    })
+      .select("date classId sectionId records")
+      .populate("classId", "name")
+      .populate("sectionId", "name")
+      .sort({ date: -1 });
+
+    // ✅ only student's record from attendance.records[]
+    const studentAttendance = attendance.map((a) => {
+      const record = a.records.find(
+        (r: any) => r.studentId.toString() === studentId
+      );
+
+      return {
+        date: a.date,
+        classId: a.classId,
+        sectionId: a.sectionId,
+        status: record?.status || null,
+      };
+    });
 
     return res.status(200).json({
       success: true,
       data: {
         student,
         fees,
+        attendance: studentAttendance,
       },
     });
   } catch (err: any) {
@@ -200,6 +229,7 @@ export const getStudentById = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 
 
