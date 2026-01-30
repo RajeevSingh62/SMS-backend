@@ -2,7 +2,7 @@ import cron from "node-cron";
 
 
 export const startPingPongCron = () => {
-  cron.schedule("*/1 * * * *", async () => {
+  cron.schedule("*/12 * * * *", async () => {
     try {
       console.log("🏓 Ping cron fired");
 
