@@ -9,6 +9,7 @@ interface EnvConfig {
   CLOUDINARY_CLOUD_NAME: string;
   CLOUDINARY_API_KEY: string;
   CLOUDINARY_API_SECRET: string;
+  OPENAI_API_KEY:string;
 }
 
 export const ENV: EnvConfig = {
@@ -19,6 +20,7 @@ export const ENV: EnvConfig = {
   CLOUDINARY_CLOUD_NAME: (process.env.CLOUDINARY_CLOUD_NAME as string),
   CLOUDINARY_API_KEY:( process.env.CLOUDINARY_API_KEY as string),
   CLOUDINARY_API_SECRET: (process.env.CLOUDINARY_API_SECRET as string),
+  OPENAI_API_KEY:(process.env.OPENAI_API_KEY as string)
 };
 
 // password of mongo =r98a2FDwOIKKoja1

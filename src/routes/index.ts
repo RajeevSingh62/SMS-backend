@@ -11,6 +11,7 @@ import classRoutes from "../modules/classes/classes.routes";
 import feeRoutes from "../modules/fee/fee.routes";
 import admindashboardRoute from "../modules/dashboard/admin-dashboard.routes";
 import eventRoute from "../modules/event/event.route"
+import aiRoutes from "../modules/ai/ai.routes"
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -27,6 +28,8 @@ router.use("/class",classRoutes);
 router.use("/fee",feeRoutes);
 router.use("/admindashboard",admindashboardRoute);
 router.use("/event",eventRoute);
+router.use("/ai",aiRoutes)
+
 
 export default router;
  
