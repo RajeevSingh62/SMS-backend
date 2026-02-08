@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import User from "./auth.model";
 import { ENV } from "../../config/env";
+import studentModel from "../student/student.model";
 
 /**
  * Helper: create JWT token
@@ -124,3 +125,4 @@ export const login = async (
     next(err); // Let global error handler deal with it
   }
 };
+

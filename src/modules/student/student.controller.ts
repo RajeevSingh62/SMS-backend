@@ -7,6 +7,7 @@ import StudentDoc from './../studentDoc/studentdoc.model';
 import { createMonthlyFeeOnAdmission } from "../fee/fee-service";
 import { StudentMonthlyFee } from "../fee/student-monthly-fee.model";
 import { FeeTemplate } from "../fee/fee-template.model";
+import Attendance from "../attendance/attendance.model";
 
 
 // ------------------------
@@ -25,6 +26,7 @@ export const admissionStudent = async (req: Request, res: Response) => {
       parents = [],
       dateOfBirth,
       gender,
+      role,
       address,
       documentUrl,
       status,
@@ -33,6 +35,13 @@ export const admissionStudent = async (req: Request, res: Response) => {
     // if (!name || !email || !password || !classId || !sectionId) {
     //   return res.status(400).json({ message: "Required fields missing" });
     // }
+        const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered. Try another email.",
+      });
+    }
 
     // 1️⃣ Create User
     const hashed = await bcrypt.hash(password, 10);
@@ -40,7 +49,7 @@ export const admissionStudent = async (req: Request, res: Response) => {
     const user = await User.create({
       name,
       email,
-      password: hashed,
+      password,
       role: "student",
     });
 
@@ -121,10 +130,15 @@ export const getAllStudents = async (req: Request, res: Response) => {
         path: "user",
         select: "name email", 
       })
+          .populate({
+        path: "user",
+        select: "name ", 
+      })
       .populate({
         path: "parents",
         select: "name phone", 
       });
+    
  
 
     return res.status(200).json({
@@ -145,39 +159,78 @@ export const getAllStudents = async (req: Request, res: Response) => {
 // ------------------------
 // GET STUDENT BY ID
 // ------------------------
+
+
 export const getStudentById = async (req: Request, res: Response) => {
   try {
-    const student = await Student.findById(req.params.id)
+    const studentId = req.params.id;
+
+    const student = await Student.findById(studentId)
+      .populate("classId", "name")
+      .populate("sectionId", "name")
+      .populate("user", "name email")
+      .populate("fee") // FeeTemplate
       .populate({
-        path: "classId",
-        select: "name", 
-      })
-      .populate({
-        path: "user",
-        select: "name email", 
-      })
-    .populate({
         path: "parents",
         populate: {
           path: "user",
           select: "name phone email",
         },
-      })
-       .populate({
-        path: "sectionId",
-        select: "name ", 
       });
- 
 
-    if (!student)
-      return res.status(404).json({ success: false, message: "Student not found" });
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
 
-    return res.json({ success: true, data: student });
+    // ✅ FETCH FEES SEPARATELY
+    const fees = await StudentMonthlyFee.find({ studentId }).sort({
+      year: -1,
+      month: -1,
+    });
 
+    // ✅ FETCH ATTENDANCE HISTORY (student wise)
+    const attendance = await Attendance.find({
+      "records.studentId": studentId,
+    })
+      .select("date classId sectionId records")
+      .populate("classId", "name")
+      .populate("sectionId", "name")
+      .sort({ date: -1 });
+
+    // ✅ only student's record from attendance.records[]
+    const studentAttendance = attendance.map((a) => {
+      const record = a.records.find(
+        (r: any) => r.studentId.toString() === studentId
+      );
+
+      return {
+        date: a.date,
+        classId: a.classId,
+        sectionId: a.sectionId,
+        status: record?.status || null,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        student,
+        fees,
+        attendance: studentAttendance,
+      },
+    });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
+
+
 
 
 // ------------------------
@@ -242,3 +295,21 @@ export const deactivateStudent = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+// student.controller.ts
+export const getMyStudentProfile = async (req: Request, res: Response) => {
+  const userId = req.user!.id; 
+
+  const student = await Student.findOne({ user: userId })
+    .populate("classId", "name")
+    .populate("sectionId", "name");
+
+  if (!student) {
+    return res.status(404).json({ message: "Student profile not found" });
+  }
+
+  res.json({
+    success: true,
+    data: student, // <-- gives STUDENT ID
+  });
+};
+
